@@ -1,0 +1,51 @@
+service: ${self:custom.package.name}
+
+plugins:
+  - serverless-esbuild
+  - serverless-iam-roles-per-function
+  - serverless-offline  # serverless-esbuild should preceed serverless-offline
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  versionFunctions: false
+  region: ${opt:region, 'eu-west-2'} # ChangeIt
+  stage: ${opt:stage, 'dev'}
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # useful for performance optimization, ref: http keep alive
+
+custom:
+  env: ${file(./env/${self:provider.stage}.yml)}
+  base: ${self:service}-${self:provider.stage}
+  host: ${self:custom.env.DOMAIN}.${self:custom.env.ROOT_DOMAIN}
+  package: ${file(./package.json)}
+  esbuild:
+    packager: yarn
+    bundle: true
+    minify: true
+    sourcemap: true
+    keepNames: true
+#    external:
+#      - lodash
+#    watch:
+#     # anymatch-compatible definition (https://github.com/es128/anymatch)
+#     pattern: [ './index.ts', 'src/**/*.ts' ] # default .
+#     ignore: [ '.serverless/**/*', '.build' ] # default ['.build', 'dist', 'node_modules']
+
+functions: # add your functions
+  health:
+    handler: src/health.handler
+    name: ${self:custom.base}-health
+    description: used as heartbeat lambda for this service
+    events:
+      - http:
+          method: get
+          cors: true
+          path: health
+
+resources:
+  # DynamoDB Tables
+  # Output
