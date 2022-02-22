@@ -47,5 +47,6 @@ functions: # add your functions
           path: health
 
 resources:
+  - ${file(resources/vpc.yml)}
   # DynamoDB Tables
   # Output
