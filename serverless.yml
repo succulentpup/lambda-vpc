@@ -10,6 +10,7 @@ package:
 
 provider:
   name: aws
+  architecture: arm64
   runtime: nodejs14.x
   versionFunctions: false
   region: ${opt:region, 'eu-west-2'} # ChangeIt
