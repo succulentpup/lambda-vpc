@@ -20,11 +20,11 @@ Resources:
       CidrBlock: 10.0.2.0/24
       VpcId:
         Ref: Vpc
-  SecurityGroup1:
+  LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow all traffic
-      GroupName: AllowAll
+      GroupName: ${self:service}-${self:provider.stage}-lambdaSecurityGroup
       VpcId:
         Ref: Vpc
       SecurityGroupIngress:
