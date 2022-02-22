@@ -49,4 +49,5 @@ functions: # add your functions
 resources:
   - ${file(resources/vpc.yml)}
   # DynamoDB Tables
+
   # Output
