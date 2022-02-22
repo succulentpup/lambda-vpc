@@ -20,3 +20,19 @@ Resources:
       CidrBlock: 10.0.2.0/24
       VpcId:
         Ref: Vpc
+  SecurityGroup1:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow all traffic
+      GroupName: AllowAll
+      VpcId:
+        Ref: Vpc
+      SecurityGroupIngress:
+        - IpProtocol: '-1'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: 'purpose'
+          Value: 'blogging'
