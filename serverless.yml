@@ -3,7 +3,7 @@ service: ${self:custom.package.name}
 plugins:
   - serverless-esbuild
   - serverless-iam-roles-per-function
-  - serverless-offline  # serverless-esbuild should preceed serverless-offline
+  - serverless-offline  # serverless-esbuild should precede serverless-offline
 
 package:
   individually: true
