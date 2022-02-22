@@ -13,6 +13,11 @@ provider:
   runtime: nodejs14.x
   versionFunctions: false
   region: ${opt:region, 'eu-west-2'} # ChangeIt
+  vpc:
+    securityGroupIds:
+      - Ref: LambdaSecurityGroup
+    subnetIds:
+      - Ref: PrivateSubnet1
   stage: ${opt:stage, 'dev'}
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # useful for performance optimization, ref: http keep alive
