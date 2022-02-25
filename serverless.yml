@@ -70,13 +70,13 @@ functions: # add your functions
         Action:
           - s3:GetObject
         Resource:
-          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/CSVFiles/*
+          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/CSVFiles/*   # manually created this folder in AWS web console of S3
     events:
       - s3:
           bucket: ${self:custom.UsageDetailsBucketName}
           event: s3:ObjectCreated:*
           rules:
-            - prefix: CSVFiles/
+            - prefix: CSVFiles/   # manually created this folder in AWS web console of S3
             - suffix: .csv
           existing: true
 resources:
