@@ -28,6 +28,7 @@ custom:
   base: ${self:service}-${self:provider.stage}
   host: ${self:custom.env.DOMAIN}.${self:custom.env.ROOT_DOMAIN}
   package: ${file(./package.json)}
+  UsageDetailsBucketName: usage-details-sg
   esbuild:
     packager: yarn
     bundle: true
@@ -54,5 +55,6 @@ functions: # add your functions
 
 resources:
   - ${file(resources/vpc.yml)}
+  - ${file(resources/s3-usageDetails.yml)}
   # DynamoDB Tables
   # Output
