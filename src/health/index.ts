@@ -7,10 +7,10 @@ import httpEventNormalizer from '@middy/http-event-normalizer';
 import httpHeaderNormalizer from '@middy/http-header-normalizer';
 import httpSecurityHeaders from '@middy/http-security-headers';
 import status from 'statuses';
-import { incomingEventLogger, onErrorHandler } from './helpers/middleware';
+import { incomingEventLogger, onErrorHandler } from '../helpers/middleware';
 
 const WHITE_SPACES = 2;
-export const health: APIGatewayProxyHandler = async (event) => {
+export const index: APIGatewayProxyHandler = async (event) => {
   Log.info('Add your implementation here');
   await Promise.resolve();
   return {
@@ -43,7 +43,7 @@ const inputSchema = {
   },
 };
 
-export const handler = middy(health)
+export const handler = middy(index)
 // eslint-disable-next-line max-len
   .use(httpEventNormalizer()) // Normalizes HTTP events by adding an empty object for queryStringParameters and pathParameters if they are missing.
   .use(httpHeaderNormalizer()) // Normalizes HTTP header names to their canonical format.
