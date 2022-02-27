@@ -1,0 +1,111 @@
+service: ${self:custom.package.name}
+
+plugins:
+  - serverless-esbuild
+  - serverless-iam-roles-per-function
+  - serverless-deployment-bucket
+  - serverless-s3-remover
+  - serverless-offline  # serverless-esbuild should precede serverless-offline or keep offline plugins at the end
+
+frameworkVersion: '>=3.0.0 <4.0.0' # helps to be in same major version unless team wants to change
+
+package:
+  individually: true # helps in reducing the zip size of the lambdas,  hence faster deployments. Especially when deploying individual lambdas.
+
+provider:
+  name: aws
+  architecture: arm64  # It's cost & performance effective. If errors are suspected on underlying architecture, comment this & test.
+  runtime: nodejs14.x
+  versionFunctions: false
+  memorySize: 1024  # change it as per the need of memory
+  timeout: 30 # default timeout
+  logRetentionInDays: 14 # cloudwatch logs add some cost, mind it while increasing this configuration
+  region: ${opt:region, 'eu-west-2'} # Change region as per your deployment region.
+  stage: ${opt:stage, 'dev'}
+  endpointType: REGIONAL # can be PRIVATE if we want to restrict the accessibility of the endpoint to VPC resources only.
+  deploymentBucket:
+    name: ${self:service}.${self:provider.region}.deploys # Can be more descriptive
+    serverSideEncryption: AES256
+    tags:
+      - Key: Environment
+        Value: ${self:provider.stage}
+  stackPolicy: ${self:custom.stackPolicy} # helpful to define permissions, retention policies etc
+  iamRoleStatements: [ ]
+  tags:
+    project: ${self:service}
+    stage: ${self:provider.stage}
+  vpc:
+    securityGroupIds:
+      - Ref: LambdaSecurityGroup
+    subnetIds:
+      - Ref: PrivateSubnet2
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # useful for performance optimization, ref: http keep alive
+    REGION: ${self:provider.region}
+
+custom:
+  env: ${file(./env/${self:provider.stage}.yml)}
+  base: ${self:service}-${self:provider.stage}
+  host: ${self:custom.env.DOMAIN}.${self:custom.env.ROOT_DOMAIN}
+  package: ${file(./package.json)}
+  stackPolicy: ${file(./env/stackPolicy.yml):${self:provider.stage}}
+  serverless-iam-roles-per-function:  # lets to have iam policies at the global level & inherit at function level.
+    defaultInherit: true
+  UsageDetailsBucketName: usage-details-sg
+  remover:
+    buckets:
+      - ${self:custom.UsageDetailsBucketName}
+  esbuild:
+    packager: yarn
+    bundle: true
+    minify: true
+    sourcemap: true
+    keepNames: true
+#    external:
+#      - lodash
+#    watch:
+#     # anymatch-compatible definition (https://github.com/es128/anymatch)
+#     pattern: [ './index.ts', 'src/**/*.ts' ] # default .
+#     ignore: [ '.serverless/**/*', '.build' ] # default ['.build', 'dist', 'node_modules']
+
+functions: # add your functions
+  health:
+    handler: src/health/index.handler
+    name: ${self:custom.base}-health
+    description: used as heartbeat lambda for this service
+    vpc: ~  # excluding this function from the VPC defined by this service
+    events:
+      - http:
+          method: get
+          cors: true
+          path: health
+  parseUsageDetails:
+    handler: src/parseUsageDetails/index.handler
+    name: ${self:custom.base}-parseUsageDetails
+    description: listens to usage-details-sg bucket/CSVFiles path, parses and send to SQS
+    environment:
+      BUCKET: ${self:custom.UsageDetailsBucketName}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:ListBucket
+        Resource:
+          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource:
+          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/CSVFiles/*   # manually created this folder in AWS web console of S3
+    events:
+      - s3:
+          bucket: ${self:custom.UsageDetailsBucketName}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: CSVFiles/   # manually created this folder in AWS web console of S3
+            - suffix: .csv
+          existing: true
+resources:
+  - ${file(resources/vpc.yml)}
+  - ${file(resources/s3-usageDetails.yml)}
+  # DynamoDB Tables
+  # Output

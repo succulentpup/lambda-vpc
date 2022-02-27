@@ -1,7 +1,7 @@
 {
-  "name": "lambda-vpc",
+  "name": "vpc-vpcendpoint-s3-success",
   "version": "1.0.0",
-  "description": "Lambda inside a vpc accessing S3, SQS, secrets manager etc.",
+  "description": "Lambda inside a vpc accessing S3. It has endpoint of gateway type created to access S3 & attached to private subnet. Private subnet doesn't have internet access",
   "author": "Ganesh Adapa",
   "license": "MIT",
   "scripts": {
@@ -12,8 +12,10 @@
     "all-static-checks": "yarn lint && yarn type-check",
     "serverless": "serverless",
     "sls": "sls",
+    "sls:pack": "sls package --stage dev",
     "deploy:dev": "yarn all-static-checks && sls deploy --stage dev",
-    "deploy:function": "yarn all-static-checks && sls deploy -f"
+    "deploy:function": "yarn all-static-checks && sls deploy -f",
+    "remove:dev": "sls remove --stage dev"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.89",
@@ -33,6 +35,7 @@
     "git-cz": "^4.8.0",
     "prettier": "^2.5.1",
     "serverless": "^3.3.0",
+    "serverless-deployment-bucket": "^1.5.2",
     "serverless-esbuild": "^1.23.3",
     "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^8.3.1",

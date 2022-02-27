@@ -13,6 +13,13 @@ Resources:
       CidrBlock: 10.0.1.0/24
       VpcId:
         Ref: Vpc
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-west-2a
+      CidrBlock: 10.0.3.0/24
+      VpcId:
+        Ref: Vpc
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -49,16 +56,29 @@ Resources:
           - AllocationId
       SubnetId:
         Ref: PublicSubnet1
-  PrivateRouteTable:
+  PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId:
         Ref: Vpc
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+#  VpcEndpointS3:
+#    Type: AWS::EC2::VPCEndpoint
+#    Properties:
+#      RouteTableIds:
+#        - Ref: PrivateRouteTable1
+#      ServiceName: com.amazonaws.${self:provider.region}.s3
+#      VpcId:
+#        Ref: Vpc
   PrivateRoute:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
-        Ref: PrivateRouteTable
+        Ref: PrivateRouteTable2
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NatGateway
@@ -66,9 +86,9 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
-        Ref: PrivateSubnet1
+        Ref: PrivateSubnet2
       RouteTableId:
-        Ref: PrivateRouteTable
+        Ref: PrivateRouteTable2
   InternetGateway:
     Type: AWS::EC2::InternetGateway
   VPCGatewayAttachment:

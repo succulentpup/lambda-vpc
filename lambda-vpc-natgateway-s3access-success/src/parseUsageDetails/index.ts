@@ -11,6 +11,7 @@ const { BUCKET: Bucket, REGION } = process.env;
 
 export const index = async (event: S3Event) => {
     Log.debug('event', { event })
+    Log.debug('testing');
     const client = new S3Client( { region: REGION } );
     const s3GetObjectInput = {
         Bucket,
