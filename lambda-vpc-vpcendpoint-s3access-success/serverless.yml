@@ -4,7 +4,6 @@ plugins:
   - serverless-esbuild
   - serverless-iam-roles-per-function
   - serverless-deployment-bucket
-  - serverless-s3-remover
   - serverless-offline  # serverless-esbuild should precede serverless-offline or keep offline plugins at the end
 
 frameworkVersion: '>=3.0.0 <4.0.0' # helps to be in same major version unless team wants to change
@@ -22,7 +21,7 @@ provider:
   logRetentionInDays: 14 # cloudwatch logs add some cost, mind it while increasing this configuration
   region: ${opt:region, 'eu-west-2'} # Change region as per your deployment region.
   stage: ${opt:stage, 'dev'}
-  endpointType: REGIONAL # can be PRIVATE if we want to restrict the accessibility of the endpoint to VPC resources only.
+  endpointType: REGIONAL # can be PRIVATE if we want to restrict the accessibility of the endpoints to VPC resources only.
   deploymentBucket:
     name: ${self:service}.${self:provider.region}.deploys # Can be more descriptive
     serverSideEncryption: AES256
@@ -38,7 +37,7 @@ provider:
     securityGroupIds:
       - Ref: LambdaSecurityGroup
     subnetIds:
-      - Ref: PrivateSubnet2
+      - Ref: PrivateSubnet1
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # useful for performance optimization, ref: http keep alive
     REGION: ${self:provider.region}
@@ -51,10 +50,7 @@ custom:
   stackPolicy: ${file(./env/stackPolicy.yml):${self:provider.stage}}
   serverless-iam-roles-per-function:  # lets to have iam policies at the global level & inherit at function level.
     defaultInherit: true
-  UsageDetailsBucketName: usage-details-sg
-  remover:
-    buckets:
-      - ${self:custom.UsageDetailsBucketName}
+  UsageDetailsBucketName: ${self:service}-usage-details-sg
   esbuild:
     packager: yarn
     bundle: true
@@ -79,10 +75,10 @@ functions: # add your functions
           method: get
           cors: true
           path: health
-  parseUsageDetails:
-    handler: src/parseUsageDetails/index.handler
-    name: ${self:custom.base}-parseUsageDetails
-    description: listens to usage-details-sg bucket/CSVFiles path, parses and send to SQS
+  parseUsageDetailsPri:
+    handler: src/parseUsageDetailsPri/index.handler
+    name: ${self:custom.base}-parseUsageDetailsPri
+    description: should be able to access S3 because of VPCEndpoint for S3 service is configured in PrivateSubnet1
     environment:
       BUCKET: ${self:custom.UsageDetailsBucketName}
     iamRoleStatements:
@@ -95,13 +91,13 @@ functions: # add your functions
         Action:
           - s3:GetObject
         Resource:
-          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/CSVFiles/*   # manually created this folder in AWS web console of S3
+          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/PrivateCSVFiles/*   # manually created this folder in AWS web console of S3
     events:
       - s3:
           bucket: ${self:custom.UsageDetailsBucketName}
           event: s3:ObjectCreated:*
           rules:
-            - prefix: CSVFiles/   # manually created this folder in AWS web console of S3
+            - prefix: PrivateCSVFiles/   # manually created this folder in AWS web console of S3
             - suffix: .csv
           existing: true
 resources:
