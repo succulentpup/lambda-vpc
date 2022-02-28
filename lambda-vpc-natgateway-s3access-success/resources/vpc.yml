@@ -10,21 +10,14 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-west-2a
-      CidrBlock: 10.0.1.0/24
-      VpcId:
-        Ref: Vpc
-  PrivateSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-west-2a
       CidrBlock: 10.0.3.0/24
       VpcId:
         Ref: Vpc
-  PublicSubnet1:
+  PublicSubnet1:  # PublicSubnet is needed to put NatGateway
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-west-2b
-      CidrBlock: 10.0.2.0/24
+      CidrBlock: 10.0.4.0/24
       VpcId:
         Ref: Vpc
   LambdaSecurityGroup:
@@ -61,24 +54,11 @@ Resources:
     Properties:
       VpcId:
         Ref: Vpc
-  PrivateRouteTable2:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:
-        Ref: Vpc
-#  VpcEndpointS3:
-#    Type: AWS::EC2::VPCEndpoint
-#    Properties:
-#      RouteTableIds:
-#        - Ref: PrivateRouteTable1
-#      ServiceName: com.amazonaws.${self:provider.region}.s3
-#      VpcId:
-#        Ref: Vpc
-  PrivateRoute:
+  PrivateRoute1:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
-        Ref: PrivateRouteTable2
+        Ref: PrivateRouteTable1
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NatGateway
@@ -86,9 +66,9 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
-        Ref: PrivateSubnet2
+        Ref: PrivateSubnet1
       RouteTableId:
-        Ref: PrivateRouteTable2
+        Ref: PrivateRouteTable1
   InternetGateway:
     Type: AWS::EC2::InternetGateway
   VPCGatewayAttachment:

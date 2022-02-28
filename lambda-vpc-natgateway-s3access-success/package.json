@@ -1,7 +1,7 @@
 {
   "name": "vpc-natgw-s3-success",
   "version": "1.0.0",
-  "description": "Lambda inside a vpc accessing S3. Natgateway is attached to private subnet hence it will have internet access",
+  "description": "Lambda is inside a vpc, accessing S3. Natgateway is attached to private subnet hence it will have internet access",
   "author": "Ganesh Adapa",
   "license": "MIT",
   "scripts": {

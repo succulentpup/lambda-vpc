@@ -4,7 +4,6 @@ plugins:
   - serverless-esbuild
   - serverless-iam-roles-per-function
   - serverless-deployment-bucket
-  - serverless-s3-remover
   - serverless-offline  # serverless-esbuild should precede serverless-offline or keep offline plugins at the end
 
 frameworkVersion: '>=3.0.0 <4.0.0' # helps to be in same major version unless team wants to change
@@ -16,7 +15,7 @@ provider:
   name: aws
   architecture: arm64  # It's cost & performance effective. If errors are suspected on underlying architecture, comment this & test.
   runtime: nodejs14.x
-  versionFunctions: false
+  versionFunctions: false  # won't create versions of lambda
   memorySize: 1024  # change it as per the need of memory
   timeout: 30 # default timeout
   logRetentionInDays: 14 # cloudwatch logs add some cost, mind it while increasing this configuration
@@ -34,27 +33,24 @@ provider:
   tags:
     project: ${self:service}
     stage: ${self:provider.stage}
-  vpc:
+  vpc: # All the lambdas defined in this service will be put in the subnets
     securityGroupIds:
       - Ref: LambdaSecurityGroup
     subnetIds:
-      - Ref: PrivateSubnet2
+      - Ref: PrivateSubnet1
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # useful for performance optimization, ref: http keep alive
     REGION: ${self:provider.region}
+    STAGE: ${self:provider.stage}
 
 custom:
-  env: ${file(./env/${self:provider.stage}.yml)}
+  env: ${file(./env/${self:provider.stage}.yml)} # Stage specific environment variables can be defined
   base: ${self:service}-${self:provider.stage}
-  host: ${self:custom.env.DOMAIN}.${self:custom.env.ROOT_DOMAIN}
   package: ${file(./package.json)}
   stackPolicy: ${file(./env/stackPolicy.yml):${self:provider.stage}}
   serverless-iam-roles-per-function:  # lets to have iam policies at the global level & inherit at function level.
     defaultInherit: true
-  UsageDetailsBucketName: usage-details-sg
-  remover:
-    buckets:
-      - ${self:custom.UsageDetailsBucketName}
+  UsageDetailsBucketName: ${self:service}-usage-details-sg
   esbuild:
     packager: yarn
     bundle: true
@@ -73,16 +69,16 @@ functions: # add your functions
     handler: src/health/index.handler
     name: ${self:custom.base}-health
     description: used as heartbeat lambda for this service
-    vpc: ~  # excluding this function from the VPC defined by this service
+    vpc: ~  # excluding this lambda from the VPC defined by this service
     events:
       - http:
           method: get
           cors: true
           path: health
-  parseUsageDetails:
-    handler: src/parseUsageDetails/index.handler
-    name: ${self:custom.base}-parseUsageDetails
-    description: listens to usage-details-sg bucket/CSVFiles path, parses and send to SQS
+  parseUsageDetailsPri:
+    handler: src/parseUsageDetailsPri/index.handler
+    name: ${self:custom.base}-parseUsageDetailsPri
+    description: should fail because this lambda is placed in a private subnet that does not have internet access.
     environment:
       BUCKET: ${self:custom.UsageDetailsBucketName}
     iamRoleStatements:
@@ -95,14 +91,14 @@ functions: # add your functions
         Action:
           - s3:GetObject
         Resource:
-          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/CSVFiles/*   # manually created this folder in AWS web console of S3
+          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/PrivateCSVFiles/*   # manually created this folder in AWS web console of S3
     events:
       - s3:
           bucket: ${self:custom.UsageDetailsBucketName}
           event: s3:ObjectCreated:*
           rules:
-            - prefix: CSVFiles/   # manually created this folder in AWS web console of S3
-            - suffix: .csv
+            - prefix: PrivateCSVFiles/   # manually created this folder in AWS web console of S3
+            - suffix: .csv # no 2 events with 'same prefix and suffix' are allowed
           existing: true
 resources:
   - ${file(resources/vpc.yml)}
