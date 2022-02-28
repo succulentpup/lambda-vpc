@@ -4,7 +4,6 @@ plugins:
   - serverless-esbuild
   - serverless-iam-roles-per-function
   - serverless-deployment-bucket
-  - serverless-s3-remover
   - serverless-offline  # serverless-esbuild should precede serverless-offline or keep offline plugins at the end
 
 frameworkVersion: '>=3.0.0 <4.0.0' # helps to be in same major version unless team wants to change
@@ -52,9 +51,6 @@ custom:
   serverless-iam-roles-per-function:  # lets to have iam policies at the global level & inherit at function level.
     defaultInherit: true
   UsageDetailsBucketName: ${self:service}-usage-details-sg
-  remover:
-    buckets:
-      - ${self:custom.UsageDetailsBucketName}
   esbuild:
     packager: yarn
     bundle: true
@@ -95,7 +91,7 @@ functions: # add your functions
         Action:
           - s3:GetObject
         Resource:
-          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/CSVFiles/*   # manually created this folder in AWS web console of S3
+          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/PrivateCSVFiles/*   # manually created this folder in AWS web console of S3
     events:
       - s3:
           bucket: ${self:custom.UsageDetailsBucketName}
@@ -134,7 +130,7 @@ functions: # add your functions
 #        Action:
 #          - s3:GetObject
 #        Resource:
-#          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/CSVFiles/*   # manually created this folder in AWS web console of S3
+#          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/PublicCSVFiles/*   # manually created this folder in AWS web console of S3
 #    events:
 #      - s3:
 #          bucket: ${self:custom.UsageDetailsBucketName}

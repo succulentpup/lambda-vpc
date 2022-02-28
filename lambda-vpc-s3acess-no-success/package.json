@@ -1,7 +1,7 @@
 {
   "name": "vpc-s3-fail",
   "version": "1.0.0",
-  "description": "Lambda inside a vpc accessing S3.",
+  "description": "Lambda is inside a vpc, not able to access S3.",
   "author": "Ganesh Adapa",
   "license": "MIT",
   "scripts": {
