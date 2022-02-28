@@ -21,7 +21,7 @@ provider:
   logRetentionInDays: 14 # cloudwatch logs add some cost, mind it while increasing this configuration
   region: ${opt:region, 'eu-west-2'} # Change region as per your deployment region.
   stage: ${opt:stage, 'dev'}
-  endpointType: REGIONAL # can be PRIVATE if we want to restrict the accessibility of the endpoint to VPC resources only.
+  endpointType: REGIONAL # can be PRIVATE if we want to restrict the accessibility of the endpoints to VPC resources only.
   deploymentBucket:
     name: ${self:service}.${self:provider.region}.deploys # Can be more descriptive
     serverSideEncryption: AES256

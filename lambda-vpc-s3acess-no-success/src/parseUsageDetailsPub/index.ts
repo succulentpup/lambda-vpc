@@ -15,7 +15,7 @@ export const index = async (event: S3Event) => {
     const client = new S3Client( { region: REGION } );
     const s3GetObjectInput = {
         Bucket,
-        Key: 'PublicCSVFiles/test.csv',
+        Key: 'PublicCSVFiles/test.csv',  // hardcoded for the sake of example
     };
     const getObjectCommand = new GetObjectCommand(s3GetObjectInput);
     const { Body } = await client.send(getObjectCommand);
