@@ -16,7 +16,7 @@ provider:
   name: aws
   architecture: arm64  # It's cost & performance effective. If errors are suspected on underlying architecture, comment this & test.
   runtime: nodejs14.x
-  versionFunctions: false
+  versionFunctions: false  # won't create versions of lambda
   memorySize: 1024  # change it as per the need of memory
   timeout: 30 # default timeout
   logRetentionInDays: 14 # cloudwatch logs add some cost, mind it while increasing this configuration
@@ -34,7 +34,7 @@ provider:
   tags:
     project: ${self:service}
     stage: ${self:provider.stage}
-  vpc:
+  vpc: # All the lambdas defined in this service will be put in the subnets
     securityGroupIds:
       - Ref: LambdaSecurityGroup
     subnetIds:
@@ -42,11 +42,11 @@ provider:
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # useful for performance optimization, ref: http keep alive
     REGION: ${self:provider.region}
+    STAGE: ${self:provider.stage}
 
 custom:
-  env: ${file(./env/${self:provider.stage}.yml)}
+  env: ${file(./env/${self:provider.stage}.yml)} # Stage specific environment variables can be defined
   base: ${self:service}-${self:provider.stage}
-  host: ${self:custom.env.DOMAIN}.${self:custom.env.ROOT_DOMAIN}
   package: ${file(./package.json)}
   stackPolicy: ${file(./env/stackPolicy.yml):${self:provider.stage}}
   serverless-iam-roles-per-function:  # lets to have iam policies at the global level & inherit at function level.
@@ -102,7 +102,7 @@ functions: # add your functions
           event: s3:ObjectCreated:*
           rules:
             - prefix: PrivateCSVFiles/   # manually created this folder in AWS web console of S3
-            - suffix: .csv # no 2 events with same prefix and suffix are allowed
+            - suffix: .csv # no 2 events with 'same prefix and suffix' are allowed
           existing: true
 
 #  --------------------------------------------------------------------------------------------------------------  #
