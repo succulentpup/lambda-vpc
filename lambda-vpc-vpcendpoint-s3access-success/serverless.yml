@@ -25,9 +25,6 @@ provider:
   deploymentBucket:
     name: ${self:service}.${self:provider.region}.deploys # Can be more descriptive
     serverSideEncryption: AES256
-    tags:
-      - Key: Environment
-        Value: ${self:provider.stage}
   stackPolicy: ${self:custom.stackPolicy} # helpful to define permissions, retention policies etc
   iamRoleStatements: [ ]
   tags:
