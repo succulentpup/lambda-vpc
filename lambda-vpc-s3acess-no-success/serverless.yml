@@ -104,7 +104,7 @@ functions: # add your functions
 #         Following is an excerpt from AWS documentation. Ref: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 #           Ensure that instances in your subnet have a globally unique IP address (public IPv4 address, Elastic IP address, or IPv6 address).
 #         Hence, it will still fail with timeout error.
-#         If you want to check, uncomment this lambda, uncomment public subnet config in vpc.yml, deploy and see the logs.
+#         If you want to check, uncomment this lambda, add public subnet config to vpc.yml, deploy and see the logs.
 
 #  parseUsageDetailsPub:
 #    handler: src/parseUsageDetailsPub/index.handler
