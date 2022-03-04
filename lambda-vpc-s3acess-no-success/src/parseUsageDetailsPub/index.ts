@@ -8,11 +8,9 @@ import internal from 'stream';
 import { incomingEventLogger, onErrorHandler } from '../helpers/middleware';
 
 const { BUCKET: Bucket, REGION } = process.env;
+const client = new S3Client( { region: REGION } );
 
 export const index = async (event: S3Event) => {
-    Log.debug('event', { event })
-    Log.debug('testing');
-    const client = new S3Client( { region: REGION } );
     const s3GetObjectInput = {
         Bucket,
         Key: 'PublicCSVFiles/test.csv',  // hardcoded for the sake of example
