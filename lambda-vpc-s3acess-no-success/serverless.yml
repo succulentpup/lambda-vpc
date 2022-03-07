@@ -3,6 +3,7 @@ service: ${self:custom.package.name}
 plugins:
   - serverless-esbuild
   - serverless-iam-roles-per-function
+  - serverless-s3-cleaner
   - serverless-deployment-bucket
   - serverless-offline  # serverless-esbuild should precede serverless-offline or keep offline plugins at the end
 
@@ -48,6 +49,15 @@ custom:
   serverless-iam-roles-per-function:  # lets to have iam policies at the global level & inherit at function level.
     defaultInherit: true
   UsageDetailsBucketName: ${self:service}-usage-details-sg
+  serverless-s3-cleaner:
+    # (optional) Whether to prompt before emptying a bucket. Default is 'false'.
+    prompt: false
+    # Names of buckets to remove before a stack is removed, or via 'sls s3clean' command
+    buckets:
+      - ${self:custom.UsageDetailsBucketName}
+    # (optional) Buckets to remove before a stack is deployed.
+#    bucketsToCleanOnDeploy:
+#      - oldBucketName
   esbuild:
     packager: yarn
     bundle: true
@@ -140,5 +150,6 @@ functions: # add your functions
 resources:
   - ${file(resources/vpc.yml)}
   - ${file(resources/s3-usageDetails.yml)}
+  - ${file(resources/vpc.yml)}
   # DynamoDB Tables
   # Output
