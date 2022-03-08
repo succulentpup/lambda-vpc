@@ -1,0 +1,5 @@
+ROOT_DOMAIN: com
+DOMAIN: serverlesshub
+SUBDOMAIN: api
+DEBUG: true
+TRACE: true

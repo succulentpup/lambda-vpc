@@ -1,0 +1,57 @@
+dev:
+  # Anything goes
+  - Effect: Allow
+    Principal: '*'
+    Action: Update:*
+    Resource: '*'
+staging:
+  # In this template, added a policy to prevent delete & replace of DynamoDB tables
+  # Similarly more policies can be applied
+  - Effect: Allow
+    Principal: '*'
+    Action: Update:*
+    Resource: '*'
+  - Effect: Deny
+    Principal: '*'
+    Action:
+      - Update:Replace
+      - Update:Delete
+    Resource: '*'
+    Condition:
+      StringEquals:
+        ResourceType:
+          - AWS::DynamoDB::Table
+qa:
+  # In this template, added a policy to prevent delete & replace of DynamoDB tables
+  # Similarly more policies can be applied
+  - Effect: Allow
+    Principal: '*'
+    Action: Update:*
+    Resource: '*'
+  - Effect: Deny
+    Principal: '*'
+    Action:
+      - Update:Replace
+      - Update:Delete
+    Resource: '*'
+    Condition:
+      StringEquals:
+        ResourceType:
+          - AWS::DynamoDB::Table
+prod:
+  # In this template, added a policy to prevent delete & replace of DynamoDB tables
+  # Similarly more policies can be applied
+  - Effect: Allow
+    Principal: '*'
+    Action: Update:*
+    Resource: '*'
+  - Effect: Deny
+    Principal: '*'
+    Action:
+      - Update:Replace
+      - Update:Delete
+    Resource: '*'
+    Condition:
+      StringEquals:
+        ResourceType:
+          - AWS::DynamoDB::Table
