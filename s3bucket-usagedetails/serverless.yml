@@ -40,6 +40,7 @@ custom:
   base: ${self:service}-${self:provider.stage}
   host: ${self:custom.env.DOMAIN}.${self:custom.env.ROOT_DOMAIN}
   package: ${file(./package.json)}
+  stackPolicy: ${file(./env/stackPolicy.yml):${self:provider.stage}}
   serverless-iam-roles-per-function:  # lets to have iam policies at the global level & inherit at function level.
     defaultInherit: true
   UsageDetailsBucketName: ${self:service}-usage-details-sg
