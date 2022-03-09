@@ -47,7 +47,13 @@ custom:
   stackPolicy: ${file(./env/stackPolicy.yml):${self:provider.stage}}
   serverless-iam-roles-per-function:  # lets to have iam policies at the global level & inherit at function level.
     defaultInherit: true
-  UsageDetailsBucketName: ${self:service}-usage-details-sg
+  UsageDetailsBucketName: !ImportValue shared-resources-usage-details-sg
+  UsageDetailsBucketArn: !Sub # !ImportValue returns special string, no correct resolution when used as ARN
+    - 'arn:aws:s3:::${BucketName}'
+    - BucketName: ${self:custom.UsageDetailsBucketName}
+  PrivateCSVFilesPath: !Sub
+    - '${UsageDetailsBucketArn}/PrivateCSVFiles/*'
+    - UsageDetailsBucketArn: ${self:custom.UsageDetailsBucketArn}
   esbuild:
     packager: yarn
     bundle: true
@@ -83,12 +89,12 @@ functions: # add your functions
         Action:
           - s3:ListBucket
         Resource:
-          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}
+          - ${self:custom.UsageDetailsBucketArn}
       - Effect: Allow
         Action:
           - s3:GetObject
         Resource:
-          - arn:aws:s3:::${self:custom.UsageDetailsBucketName}/PrivateCSVFiles/*   # manually created this folder in AWS web console of S3
+          - ${self:custom.UsageDetailsBucketArn}
     events:
       - s3:
           bucket: ${self:custom.UsageDetailsBucketName}
@@ -99,6 +105,3 @@ functions: # add your functions
           existing: true
 resources:
   - ${file(resources/vpc.yml)}
-  - ${file(resources/s3-usageDetails.yml)}
-  # DynamoDB Tables
-  # Output
