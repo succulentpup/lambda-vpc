@@ -9,14 +9,14 @@ Resources:
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: eu-west-2a
+      AvailabilityZone: ${self:provider.region}a
       CidrBlock: 10.0.3.0/24
       VpcId:
         Ref: Vpc
   PublicSubnet1:  # PublicSubnet is needed to put NatGateway
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: eu-west-2b
+      AvailabilityZone: ${self:provider.region}b
       CidrBlock: 10.0.4.0/24
       VpcId:
         Ref: Vpc

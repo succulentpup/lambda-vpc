@@ -9,7 +9,7 @@ Resources:
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: eu-west-2a
+      AvailabilityZone: ${self:provider.region}a
       CidrBlock: 10.0.1.0/24
       VpcId:
         Ref: Vpc
