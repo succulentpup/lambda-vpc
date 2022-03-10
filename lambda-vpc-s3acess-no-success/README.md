@@ -2,6 +2,8 @@
 
 ## Lambda is in a VPC, triggered by S3 CreateObject event.
 
+![Alt text](./architecture.svg?raw=true&sanitize=true "architecture diagram")
+
 In this example, following resources are created.
 
 
